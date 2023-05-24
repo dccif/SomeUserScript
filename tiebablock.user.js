@@ -28,11 +28,9 @@
       let currentUserId = JSON.parse(
         userspan.getAttribute("data-field")
       ).user_id;
-      console.log("userid:" + currentUserId);
 
       // if in block list then remove
       if (blockedUsers.includes(currentUserId.toString())) {
-        console.log(userspan);
         userspan.closest("li").remove();
       }
     }
