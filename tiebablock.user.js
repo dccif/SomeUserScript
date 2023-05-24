@@ -6,14 +6,79 @@
 // @author       dccif
 // @match        *://tieba.baidu.com/*
 // @match        *://tieba.baidu.com/p/*
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_addStyle
 // @run-at       document-end
 // ==/UserScript==
 
 (async function () {
   "use strict";
+  var blockuser = "blockerUser";
+  var blockedUsersSet = new Set();
+  var storedBlockedUser = GM_getValue(blockuser, blockedUsersSet);
 
-  var blockedUsers = [];
+  // add Button svg
+  var addSVG = `<svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <title/> <g id="Complete"> <g data-name="add" id="add-2"> <g> <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12" y1="19" y2="5"/> <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="5" x2="19" y1="12" y2="12"/> </g> </g> </g> </svg>`;
+
+  // 添加样式
+  GM_addStyle(`
+ #settingsButton {
+     position: fixed;
+     bottom: 20px;
+     left: 20px;
+     z-index: 9999;
+ }
+ #blockedUsers {
+     position: fixed;
+     bottom: 60px;
+     left: 20px;
+     z-index: 9999;
+     display: none;
+     background: #ffffff;
+     border: 1px solid #000000;
+     padding: 10px;
+ }
+`);
+  // 创建设置按钮
+  var btn = document.createElement("button");
+  btn.id = "settingsButton";
+  btn.innerHTML = "Settings";
+
+  // 添加点击事件
+  btn.onclick = function () {
+    var blockedUsersDiv = document.getElementById("blockedUsers");
+    blockedUsersDiv.style.display =
+      blockedUsersDiv.style.display === "none" ? "block" : "none";
+  };
+
+  // 将按钮添加到页面
+  document.body.appendChild(btn);
+
+  // 创建一个div来显示黑名单用户
+  var blockedUsersDiv = document.createElement("div");
+  blockedUsersDiv.id = "blockedUsers";
+
+  // 获取存储的黑名单用户
+  var blockedUsers = GM_getValue(blockuser, []);
+
+  for (let blockuser of blockedUsers) {
+    let userDiv = document.createElement("div");
+    userDiv.innerHTML += "<p>" + blockuser + "</p>";
+    // 添加删除按钮
+    let deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = function () {
+      // 删除用户并更新窗口
+      removeUserFromBlacklist(blockuser);
+      blockedUsersDiv.removeChild(userDiv);
+    };
+
+    blockedUsersDiv.appendChild(deleteButton);
+  }
+
+  // 将div添加到页面
+  document.body.appendChild(blockedUsersDiv);
 
   // css Thread List
   var threadCSS = ".threadlist_author";
@@ -24,7 +89,7 @@
   autherList.forEach((userdiv) => {
     // add button
     let addToblock = document.createElement("button");
-    addToblock.innerHTML = "Add to block";
+    addToblock.innerHTML = addSVG;
     userdiv.appendChild(addToblock);
 
     // get user id
@@ -35,14 +100,28 @@
       ).user_id;
 
       // if in block list then remove
-      if (blockedUsers.includes(currentUserId.toString())) {
+      if (blockedUsersSet.includes(currentUserId)) {
         userspan.closest("li").remove();
       }
-    }
 
-    // button click event
-    addToblock.addEventListener("click", () => {
-      console.log("已经添加" + currentUserId);
-    });
+      // button click event
+      addToblock.addEventListener("click", () => {
+        console.log("已经添加" + currentUserId);
+        blockedUsersSet.push(currentUserId);
+        GM_setValue(blockuser, blockedUsersSet);
+      });
+    }
   });
+  console.log("Store b", GM_getValue(blockuser));
+
+  function removeUserFromBlacklist(user) {
+    // 从黑名单中删除用户
+    var blacklist = GM_getValue(blockuser, []);
+    var index = blacklist.indexOf(user);
+
+    if (index !== -1) {
+      blacklist.splice(index, 1);
+      GM_setValue("blacklist", blacklist);
+    }
+  }
 })();
