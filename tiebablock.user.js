@@ -13,7 +13,7 @@
 (async function () {
   "use strict";
 
-  var blockedUsers = ["2157031743", "user2", "user3"];
+  var blockedUsers = [];
 
   // css Thread List
   var threadCSS = ".threadlist_author";
@@ -22,6 +22,11 @@
   let autherList = document.querySelectorAll(threadCSS);
 
   autherList.forEach((userdiv) => {
+    // add button
+    let addToblock = document.createElement("button");
+    addToblock.innerHTML = "Add to block";
+    userdiv.appendChild(addToblock);
+
     // get user id
     let userspan = userdiv.querySelector("span[data-field]");
     if (userspan) {
@@ -34,5 +39,10 @@
         userspan.closest("li").remove();
       }
     }
+
+    // button click event
+    addToblock.addEventListener("click", () => {
+      console.log("已经添加" + currentUserId);
+    });
   });
 })();
