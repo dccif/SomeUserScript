@@ -88,31 +88,65 @@
     let authorList = document.querySelectorAll(threadCSS);
 
     authorList.forEach((userdiv) => {
-        // add button
-        let addToblock = document.createElement("button");
-        addToblock.innerHTML = addSVG;
-        userdiv.appendChild(addToblock);
-
         // get user id
         let userspan = userdiv.querySelector("span[data-field]");
         if (userspan) {
-            let currentUserId = JSON.parse(
-                userspan.getAttribute("data-field")
-            ).user_id;
-
-            // if in block list then remove
-            if (blockedUsers.includes(currentUserId)) {
-                userspan.closest("li").remove();
-            }
+            let currentUserId = getUserIdFromElem(userspan);
+            checkInBlockAndRemove(userspan, (elem) => {
+                elem.closest("li").remove()
+            })
+            //
+            // // if in block list then remove
+            // if (blockedUsers.includes(currentUserId)) {
+            //     userspan.closest("li").remove();
+            // }
+            addBlockButtontoEle(userdiv, currentUserId)
         }
+        // addToblock.addEventListener("click", () => {
+        //     console.log("已经添加" + currentUserId);
+        //     blockedUsers.push(currentUserId);
+        //     GM_setValue(settingKey, [...new Set(blockedUsers)]);
+        // });
+    });
+
+    // post author list
+    var postAuthorCSS = ".d_name"
+    console.log("获取post回复列表")
+    let postAuthorList = document.querySelectorAll(postAuthorCSS)
+    postAuthorList.forEach((postAuthor) => {
+        let replyLi = postAuthor.querySelector("li[data-fiedl]")
+        if (replyLi) {
+            let currentUserId = getUserIdFromElem(replyLi)
+        }
+    })
+
+    function getUserIdFromElem(elem) {
+        return JSON.parse(
+            elem.getAttribute("data-field")
+        ).user_id;
+    }
+
+    function checkInBlockAndRemove(elem, removeFn) {
+        let currentUserId = getUserIdFromElem(elem)
+
+        if (blockedUsers.includes(currentUserId)) {
+            removeFn(elem)
+        }
+    }
+
+    function addBlockButtontoEle(ele, userId) {
+        // add Button
+        let addToblock = document.createElement("button")
+        addToblock.innerHTML = addSVG
+        ele.appendChild(addToblock)
 
         // button click event
         addToblock.addEventListener("click", () => {
-            console.log("已经添加" + currentUserId);
-            blockedUsers.push(currentUserId);
+            console.log("已经添加" + userId)
+            blockedUsers.push(userId)
             GM_setValue(settingKey, [...new Set(blockedUsers)]);
-        });
-    });
+        })
+    }
 
     function removeUserFromBlacklist(user) {
         // 从黑名单中删除用户
