@@ -9,6 +9,7 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_addStyle
+// @grant        unsafeWindow
 // @run-at       document-end
 // ==/UserScript==
 
@@ -54,10 +55,6 @@
         blockedUsersDiv.style.display =
             blockedUsersDiv.style.display === "none" ? "block" : "none";
     };
-
-    // 将按钮添加到页面
-    document.body.appendChild(btn);
-
     // 获取存储的黑名单用户
     var blockedUsers = GM_getValue(settingKey, blockedUsersArray);
     blockedUsers = Array.from(blockedUsers)
@@ -80,13 +77,17 @@
     // 将div添加到页面
     document.body.appendChild(blockedUsersDiv);
 
+    // 将按钮添加到页面
+    document.body.appendChild(btn);
+
     // css Thread List
     var threadCSS = ".threadlist_author";
 
-    // get auther List
-    let autherList = document.querySelectorAll(threadCSS);
+    // get author List
+    console.log("获取帖子列表")
+    let authorList = document.querySelectorAll(threadCSS);
 
-    autherList.forEach((userdiv) => {
+    authorList.forEach((userdiv) => {
         // add button
         let addToblock = document.createElement("button");
         addToblock.innerHTML = addSVG;
@@ -100,19 +101,18 @@
             ).user_id;
 
             // if in block list then remove
-            if (blockedUsersArray.includes(currentUserId)) {
+            if (blockedUsers.includes(currentUserId)) {
                 userspan.closest("li").remove();
             }
-
-            // button click event
-            addToblock.addEventListener("click", () => {
-                console.log("已经添加" + currentUserId);
-                blockedUsersArray.push(currentUserId);
-                GM_setValue(settingKey, [...new Set(blockedUsersArray)]);
-            });
         }
+
+        // button click event
+        addToblock.addEventListener("click", () => {
+            console.log("已经添加" + currentUserId);
+            blockedUsers.push(currentUserId);
+            GM_setValue(settingKey, [...new Set(blockedUsers)]);
+        });
     });
-    console.log("Store b", GM_getValue(settingKey));
 
     function removeUserFromBlacklist(user) {
         // 从黑名单中删除用户
