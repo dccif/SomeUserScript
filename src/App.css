@@ -1,0 +1,20 @@
+#tiebaBlocker {
+  position: fixed;
+  bottom: 5%;
+  left: 1%;
+  z-index: 1000;
+}
+#blockerList {
+  position: fixed;
+  bottom: 5%;
+  right: 1%;
+  z-index: 1000;
+}
+.blockerButton {
+  width: 20px;
+  height: 20px;
+}
+.testButton {
+  display: flex;
+  flex-direction: column;
+}
