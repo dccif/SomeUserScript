@@ -8,7 +8,9 @@ Some Little UserScript
 
 给贴吧添加上黑名单功能
 
-[贴吧黑名单脚本](https://github.com/dccif/SomeUserScript/raw/main/tiebablock.user.js)
+## 已完成
+
+- [x] 用户名屏蔽
 
 ## TODO
 
