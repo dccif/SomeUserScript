@@ -13,7 +13,7 @@ export default defineConfig({
         namespace: "dccif.top",
         version: "1.0.0",
         author: "dccif",
-        match: ["*://tieba.baidu.com/*", "*://tieba.baidu.com/p/*"],
+        match: ["*://tieba.baidu.com/f*", "*://tieba.baidu.com/p/*"],
       },
       build: {
         externalGlobals: {

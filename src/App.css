@@ -1,3 +1,7 @@
+:root {
+  --blockerListContainer-width: 40vw;
+  --blockerListContainer-height: 30vh;
+}
 #tiebaBlocker {
   position: fixed;
   bottom: 5%;
@@ -9,6 +13,33 @@
   bottom: 5%;
   right: 1%;
   z-index: 1000;
+}
+#blockerListContainer {
+  position: fixed;
+  top: calc(60vh - var(--blockerListContainer-height));
+  left: calc(60vw - var(--blockerListContainer-width));
+  background-color: white;
+  width: var(--blockerListContainer-width);
+  height: var(--blockerListContainer-height);
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  overflow: auto;
+}
+#blockerListContainer .myCloseBtn {
+  position: relative;
+}
+#blockerListContainer .myblockerList {
+  flex: 1;
+}
+#blockerListContainer th,
+#blockerListContainer td {
+  text-align: center;
+  border: 1px solid black;
+}
+#blockerListContainer table {
+  width: 100%;
 }
 .blockerButton {
   width: 20px;

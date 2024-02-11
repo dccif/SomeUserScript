@@ -1,10 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { GM_setValue, GM_getValue, GM_listValues } from "$";
-import "./App.css";
+import { GM_getValue, GM_listValues, GM_setValue } from '$';
+import { useEffect, useRef, useState } from 'react';
+
+import './App.css';
+
+import BlockerUserList from './BlockerUserList';
+
+export const GM_STORE_USERIDKEY = 'tiebaBlocker';
+export const GM_STORE_NICKNAMEMAPKEY = 'tiebaBlockerIdNickNameMap';
 
 var tiebaBlocker = {
   curPage: 1,
 };
+
+var tiebaIdNickNameMap: Map<number, string> = new Map();
+
 function getCurrentPagePnValue() {
   // 获取当前页面的URL
   const currentUrl = window.location.href;
@@ -16,7 +25,7 @@ function getCurrentPagePnValue() {
   const searchParams = new URLSearchParams(url.search);
 
   // 获取'pn'参数的值
-  const pnValue = searchParams.get("pn");
+  const pnValue = searchParams.get('pn');
 
   // 如果'pn'参数存在，则打印其值，否则打印'pn参数不存在'
   if (pnValue !== null) {
@@ -46,7 +55,7 @@ const squareAddSVG = `
   </svg>`;
 
 function getUserIdFromElem(elem: Element): number {
-  return JSON.parse(elem.getAttribute("data-field")!).user_id;
+  return JSON.parse(elem.getAttribute('data-field')!).user_id;
 }
 
 function App() {
@@ -56,56 +65,37 @@ function App() {
   const inBlockerUser = useRef<number[]>([]);
   const [curBlockerUser, setCurBlockerUser] = useState<Set<number>>(new Set());
 
-  const renderBlockerUserList = (
-    blockerUserSet: Set<number>,
-    removeFromBlocker: (
-      e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-      item: number
-    ) => void
-  ) => {
-    const blockerUserArray = Array.from(blockerUserSet);
-    if (blockerUserArray.length > 0) {
-      return blockerUserArray.map((userId) => (
-        <div key={userId} onClick={(e) => removeFromBlocker(e, userId)}>
-          {userId}
-        </div>
-      ));
-    } else {
-      return <div>当前没有用户被屏蔽</div>;
-    }
-  };
-
   const initObserver = () => {
-    let pageElem = document.getElementById("pagelet_frs-base/pagelet/content");
+    let pageElem = document.getElementById('pagelet_frs-base/pagelet/content');
     if (!pageElem) {
-      console.log("Page element not found.");
+      console.log('Page element not found.');
       return;
     }
 
     const observer = new MutationObserver((mutationsList) => {
       for (let mutation of mutationsList) {
-        if (mutation.type !== "childList") continue;
+        if (mutation.type !== 'childList') continue;
 
         Array.from(mutation.addedNodes).forEach((node) => {
           if (node.nodeType !== Node.ELEMENT_NODE) return;
 
           const element = node as HTMLElement;
-          if (!element.classList.contains("thread_list_bottom")) return;
+          if (!element.classList.contains('thread_list_bottom')) return;
 
           const target = element.querySelector<HTMLSpanElement>(
-            "#frs_list_pager span"
+            '#frs_list_pager span',
           );
           if (!target) return;
 
           const spanContent = target.textContent || target.innerText;
           console.log(
-            "decPage",
-            decidePage(parseInt(spanContent), getCurrentPagePnValue())
+            'decPage',
+            decidePage(parseInt(spanContent), getCurrentPagePnValue()),
           );
 
           tiebaBlocker.curPage = decidePage(
             parseInt(spanContent),
-            getCurrentPagePnValue()
+            getCurrentPagePnValue(),
           );
           setCurPage(tiebaBlocker.curPage);
         });
@@ -120,8 +110,8 @@ function App() {
   };
 
   const checkBlocker = () => {
-    inBlockerUser.current = GM_getValue("tiebaBlocker");
-    const parsedData = JSON.parse(GM_getValue("tiebaBlocker", "[]"));
+    inBlockerUser.current = GM_getValue(GM_STORE_USERIDKEY);
+    const parsedData = JSON.parse(GM_getValue(GM_STORE_USERIDKEY, '[]'));
     if (Array.isArray(parsedData)) {
       setCurBlockerUser(new Set(parsedData));
     } else {
@@ -129,24 +119,40 @@ function App() {
     }
   };
 
-  function addBlockBtnClick(event: Event, userId: number) {
+  function addBlockBtnClick(event: Event, userId: number, elem: Element) {
     event.preventDefault();
     event.stopPropagation();
+    console.log('this is elem', elem);
+
+    // 获取用户名
+    const curNickName = elem.querySelector<HTMLAnchorElement>(
+      '.frs-author-name-wrap>a',
+    )?.innerText;
+
+    if (curNickName) {
+      tiebaIdNickNameMap.set(userId, curNickName);
+    }
 
     const curLiElem = (event.target as SVGElement).closest<HTMLLIElement>(
-      ".j_thread_list.clearfix.thread_item_box"
+      '.j_thread_list.clearfix.thread_item_box',
     );
     if (curLiElem) {
-      curLiElem.style.display = "none";
+      curLiElem.style.display = 'none';
     }
+
+    console.log('curBlockerUser:', tiebaIdNickNameMap);
 
     setCurBlockerUser((curBlockerUser) => {
       const updatedBlockerUser = new Set(curBlockerUser);
       if (!updatedBlockerUser.has(userId)) {
         updatedBlockerUser.add(userId);
         GM_setValue(
-          "tiebaBlocker",
-          JSON.stringify(Array.from(updatedBlockerUser))
+          GM_STORE_USERIDKEY,
+          JSON.stringify(Array.from(updatedBlockerUser)),
+        );
+        GM_setValue(
+          GM_STORE_NICKNAMEMAPKEY,
+          JSON.stringify(tiebaIdNickNameMap),
         );
       }
       return updatedBlockerUser;
@@ -154,12 +160,12 @@ function App() {
   }
 
   const removeFromBlocker = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    item: number
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    item: number,
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("removeI", item);
+    console.log('removeI', item);
 
     setCurBlockerUser((curBlockerUser) => {
       // 克隆当前的屏蔽用户集合
@@ -171,8 +177,8 @@ function App() {
 
         // 更新存储，以保持屏蔽列表的最新状态
         GM_setValue(
-          "tiebaBlocker",
-          JSON.stringify(Array.from(updatedBlockerUser))
+          GM_STORE_USERIDKEY,
+          JSON.stringify(Array.from(updatedBlockerUser)),
         );
       }
 
@@ -182,11 +188,11 @@ function App() {
   };
 
   const addTieList = () => {
-    const authorList = document.querySelectorAll(".threadlist_author");
-    console.log("inU", inBlockerUser.current);
+    const authorList = document.querySelectorAll('.threadlist_author');
+    console.log('inU', inBlockerUser.current);
 
     authorList.forEach((authorDiv) => {
-      const userSpan = authorDiv.querySelector("span[data-field]");
+      const userSpan = authorDiv.querySelector('span[data-field]');
       if (userSpan) {
         const curUserId = getUserIdFromElem(userSpan);
 
@@ -195,10 +201,10 @@ function App() {
           inBlockerUser.current.includes(curUserId)
         ) {
           const curLiElem = authorDiv.closest<HTMLLIElement>(
-            ".j_thread_list.clearfix.thread_item_box"
+            '.j_thread_list.clearfix.thread_item_box',
           );
           if (curLiElem) {
-            curLiElem.style.display = "none";
+            curLiElem.style.display = 'none';
           }
         }
 
@@ -207,28 +213,35 @@ function App() {
       }
     });
 
-    console.log("This is all", curPageUser.current);
+    console.log('This is all', curPageUser.current);
   };
 
   function addBlockButtonToEle(elem: Element, userId: number) {
     // 获取elem的父节点
     const parent = elem.parentNode;
     if (parent) {
-      const nowButton = parent.querySelectorAll(".blockerButton");
+      const nowButton = parent.querySelectorAll('.blockerButton');
       if (nowButton.length > 0) return;
 
-      let addBtn = document.createElement("button");
+      let addBtn = document.createElement('button');
       addBtn.innerHTML = squareAddSVG;
-      addBtn.className = "blockerButton";
-      addBtn.addEventListener("click", (event) =>
-        addBlockBtnClick(event, userId)
+      addBtn.className = 'blockerButton';
+      addBtn.addEventListener('click', (event) =>
+        addBlockBtnClick(event, userId, elem),
       );
       parent.insertBefore(addBtn, elem);
     }
   }
 
+  const closeBlockerList = () => {
+    setVisible(false);
+  };
+
   useEffect(() => {
-    addTieList();
+    const urlPattern = /tieba\.baidu\.com\/f.*/;
+    if (urlPattern.test(window.location.href)) {
+      addTieList();
+    }
   }, [curPage]);
 
   useEffect(() => {
@@ -241,9 +254,12 @@ function App() {
       <div id="tiebaBlocker">
         <div>
           {visible ? (
-            <div>
-              {renderBlockerUserList(curBlockerUser, removeFromBlocker)}
-              <button onClick={() => setVisible(false)}>关闭</button>
+            <div id="blockerListContainer">
+              <BlockerUserList
+                blcokerUserSet={curBlockerUser}
+                removeFromBlocker={removeFromBlocker}
+                onClose={closeBlockerList}
+              />
             </div>
           ) : (
             <button onClick={() => setVisible(true)}>显示黑名单</button>
@@ -252,8 +268,12 @@ function App() {
         <div className="testButton">
           <button
             onClick={() => {
-              console.log("cur user", curBlockerUser);
-              console.log("gmGet", GM_listValues());
+              console.log('cur user', curBlockerUser);
+              console.log(
+                'gmGet',
+                GM_listValues(),
+                GM_getValue(GM_STORE_NICKNAMEMAPKEY),
+              );
             }}
           >
             获取当前存储与状态
