@@ -17,7 +17,7 @@ const BlockerUserList = ({
 }) => {
   const blockerUserArray = Array.from(blcokerUserSet);
   const nickNameMap = useRef<Map<number, string>>(
-    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY))),
+    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY, '[]'))),
   );
 
   const contentNode =
