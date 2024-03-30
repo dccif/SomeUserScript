@@ -1,7 +1,7 @@
-import { GM_getValue } from '$';
-import { useRef } from 'react';
+import { GM_getValue } from "$";
+import { useRef } from "preact/hooks";
 
-import { GM_STORE_NICKNAMEMAPKEY } from './App';
+import { GM_STORE_NICKNAMEMAPKEY } from "./app";
 
 const BlockerUserList = ({
   blcokerUserSet,
@@ -9,15 +9,12 @@ const BlockerUserList = ({
   onClose,
 }: {
   blcokerUserSet: Set<number>;
-  removeFromBlocker: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    userId: number,
-  ) => void;
+  removeFromBlocker: (e: MouseEvent, userId: number) => void;
   onClose: () => void;
 }) => {
   const blockerUserArray = Array.from(blcokerUserSet);
   const nickNameMap = useRef<Map<number, string>>(
-    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY, '[]'))),
+    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY, "[]")))
   );
 
   const contentNode =
@@ -44,7 +41,7 @@ const BlockerUserList = ({
         </tbody>
       </table>
     ) : (
-      '当前没有用户被屏蔽'
+      "当前没有用户被屏蔽"
     );
 
   return (

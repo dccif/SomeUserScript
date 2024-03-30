@@ -1,18 +1,11 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { render } from "preact";
+import App from "./app";
 
-import App from './App';
-
-import './index.css';
-
-ReactDOM.createRoot(
+render(
+  <App />,
   (() => {
-    const app = document.createElement('div');
+    const app = document.createElement("div");
     document.body.append(app);
     return app;
-  })(),
-).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  })()
 );

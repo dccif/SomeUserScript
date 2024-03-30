@@ -1,27 +1,23 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import preact from "@preact/preset-vite";
 import monkey, { cdn } from "vite-plugin-monkey";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    preact(),
     monkey({
       entry: "src/main.tsx",
       userscript: {
         icon: "https://vitejs.dev/logo.svg",
         namespace: "dccif.top",
-        version: "1.0.0",
+        version: "1.0.1",
         author: "dccif",
         match: ["*://tieba.baidu.com/f*", "*://tieba.baidu.com/p/*"],
       },
       build: {
         externalGlobals: {
-          react: cdn.jsdelivr("React", "umd/react.production.min.js"),
-          "react-dom": cdn.jsdelivr(
-            "ReactDOM",
-            "umd/react-dom.production.min.js"
-          ),
+          preact: cdn.jsdelivr("preact", "dist/preact.min.js"),
         },
       },
     }),
