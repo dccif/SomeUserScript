@@ -1,10 +1,10 @@
-import { render } from "preact";
-import App from "./app";
+import { render } from 'preact';
+import App from './App';
 
 render(
   <App />,
   (() => {
-    const app = document.createElement("div");
+    const app = document.createElement('div');
     document.body.append(app);
     return app;
   })()

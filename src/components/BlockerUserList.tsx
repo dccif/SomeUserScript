@@ -1,7 +1,6 @@
-import { GM_getValue } from "$";
-import { useRef } from "preact/hooks";
-
-import { GM_STORE_NICKNAMEMAPKEY } from "./app";
+import { GM_getValue } from '$';
+import { useRef } from 'preact/hooks';
+import { GM_STORE_NICKNAMEMAPKEY } from '../config';
 
 const BlockerUserList = ({
   blcokerUserSet,
@@ -14,7 +13,7 @@ const BlockerUserList = ({
 }) => {
   const blockerUserArray = Array.from(blcokerUserSet);
   const nickNameMap = useRef<Map<number, string>>(
-    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY, "[]")))
+    new Map(JSON.parse(GM_getValue(GM_STORE_NICKNAMEMAPKEY, '[]')))
   );
 
   const contentNode =
@@ -41,13 +40,13 @@ const BlockerUserList = ({
         </tbody>
       </table>
     ) : (
-      "当前没有用户被屏蔽"
+      '当前没有用户被屏蔽'
     );
 
   return (
     <>
-      <div className="myblockerList">{contentNode}</div>
-      <button className="myCloseBtn" onClick={onClose}>
+      <div className='myblockerList'>{contentNode}</div>
+      <button className='myCloseBtn' onClick={onClose}>
         关闭
       </button>
     </>
